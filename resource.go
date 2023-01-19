@@ -25,8 +25,8 @@ func (r *Resource) GetAll() (*simplejson.Json, error) {
 	return getClient().http.request("GET", r.Path, nil)
 }
 
-func (r *Resource) GetById(id int) (*simplejson.Json, error) {
-	return getClient().http.request("GET", formatPath(r.Path, strconv.Itoa(id)), nil)
+func (r *Resource) GetById(id string) (*simplejson.Json, error) {
+	return getClient().http.request("GET", formatPath(r.Path, id), nil)
 }
 
 func (r *Resource) Create(data map[string]interface{}) {

@@ -1,8 +1,10 @@
 package client
 
 import (
-	"fmt"
 	"testing"
+
+	simplejson "github.com/bitly/go-simplejson"
+	"gopkg.in/stretchr/testify.v1/assert"
 )
 
 func TestApi(t *testing.T) {
@@ -13,16 +15,22 @@ func TestApi(t *testing.T) {
 		t.Error("Authentication failed!")
 	}
 
-	// j, err := c.GlobalDailyReport(8, 2022).GetById(0)
-	// fmt.Printf("Global Daily Report GetById: %+v", j)
-	// if err != nil {
-	// 	t.Error("Global Daily Report GetById failed!")
-	// }
+	globalRecovered2023 := c.GlobalRecovered(2023)
+	globalRecovered2023.Name = "Time Series - Recovered Global 2023"
+	endpoints := []*Resource{globalRecovered2023, c.GlobalConfirmed(2023), c.GlobalDeath(2023), c.UsConfirmed(2023), c.UsDeath(2023)}
+	var res *simplejson.Json
+	var err error
+	var id string
+	for _, endpoint := range endpoints {
+		t.Log("begin to test " + endpoint.Name + "'s GetAll api")
+		res, err = endpoint.GetAll()
+		assert.Empty(t, err, endpoint.Name+" GetAll Api test failed")
 
-	j, err := c.GlobalRecovered(2023).GetAll()
-	fmt.Printf("Global Recovered Data GetAll: %+v", j)
-	if err != nil {
-		t.Error("Global Recovered Data GetAll failed!")
+		id = res.Get("Document").GetIndex(0).Get("id").MustString()
+
+		t.Log("begin to test " + endpoint.Name + "'s GetByID api, ID: " + id)
+		_, err = endpoint.GetById(id)
+		assert.Empty(t, err, endpoint.Name+" GetByID Api test failed")
 	}
 
 }
